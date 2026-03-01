@@ -1,0 +1,83 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IOTA VERBUM CORE - Provenance Report</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <main class="result-page">
+    <section class="panel certificate-panel">
+      <div class="panel-header">
+        <h1>Provenance Certificate</h1>
+        <span class="verified-badge">VERIFIED</span>
+      </div>
+      <div class="fact-grid">
+        <div><span>Record ID</span><strong>{{ result.record_id }}</strong></div>
+        <div><span>Document Hash</span><strong>{{ result.document_hash[:16] }}...</strong></div>
+        <div><span>Timestamp</span><strong>{{ result.provenance_meta.timestamp }}</strong></div>
+        <div><span>Engine Version</span><strong>{{ result.provenance_meta.commit_ref }}</strong></div>
+        <div><span>Tenant ID</span><strong>{{ result.tenant_id }}</strong></div>
+        <div><span>Language</span><strong>{{ result.language }}</strong></div>
+      </div>
+    </section>
+
+    <section class="panel governance-panel">
+      <div class="panel-header">
+        <h2>Governance Compliance</h2>
+        <span class="seal">Audit Ready</span>
+      </div>
+      <div class="fact-grid">
+        <div><span>EU AI Act</span><strong>{{ result.governance_metadata.eu_ai_act_article }}</strong></div>
+        <div><span>NIST AI RMF</span><strong>{{ result.governance_metadata.nist_rmf_function }}</strong></div>
+        <div><span>Risk Tier</span><strong>{{ result.governance_metadata.risk_tier }}</strong></div>
+        <div><span>Audit Ready</span><strong>{{ result.governance_metadata.audit_ready }}</strong></div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-header">
+        <h2>Neurosymbolic Boundary Audit</h2>
+      </div>
+      <div class="audit-grid">
+        <div>
+          <h3>Symbolic Components</h3>
+          <ul>
+            {% for component in result.neurosymbolic_boundary.symbolic_components_used %}
+            <li>{{ component }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+        <div>
+          <h3>Neural Components</h3>
+          {% if result.neurosymbolic_boundary.neural_components_used %}
+          <ul>
+            {% for component in result.neurosymbolic_boundary.neural_components_used %}
+            <li>{{ component }}</li>
+            {% endfor %}
+          </ul>
+          {% else %}
+          <p>None active in v0.2.x - symbolic layer only.</p>
+          {% endif %}
+          <p><strong>Symbolic Confidence:</strong> {{ result.neurosymbolic_boundary.symbolic_confidence }}</p>
+          <p><strong>Boundary Version:</strong> {{ result.neurosymbolic_boundary.boundary_version }}</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-header">
+        <h2>Extraction Results</h2>
+      </div>
+      <div class="json-card">
+        <pre>{{ result_json }}</pre>
+      </div>
+    </section>
+
+    <footer class="report-footer">
+      This record is independently verifiable. To verify programmatically: GET /v1/verify/{{ result.record_id }} with your API key.
+    </footer>
+  </main>
+</body>
+</html>

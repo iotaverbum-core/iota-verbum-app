@@ -1,0 +1,11 @@
+﻿MASTER SERVICES AGREEMENT
+
+This Master Services Agreement is entered into as of January 15, 2024 by and between Alpha Systems, Inc., a Delaware corporation ("Licensor") and Beta Operations LLC, a Texas limited liability company ("Licensee").
+
+"Software" means the hosted workflow orchestration platform provided by Licensor.
+
+The term shall begin on the Effective Date and continue until January 14, 2025 for twelve months.
+Licensor shall provide remote onboarding sessions, administrator training materials, and standard email support during Licensor's normal business hours.
+Licensee shall pay all undisputed fees within thirty days of invoice receipt.
+This Agreement shall be governed by the laws of the State of Delaware.
+Either party may terminate this Agreement for material breach upon thirty days written notice.

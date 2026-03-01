@@ -1,0 +1,42 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IOTA VERBUM CORE - Legal Document Intelligence</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <header class="hero-header">
+    <div class="logo">IOTA VERBUM CORE</div>
+    <div class="tagline">Deterministic Legal Intelligence · Neurosymbolic Provenance Architecture</div>
+  </header>
+  <main class="upload-page">
+    <section class="intro-card">
+      <h1>Analyse a Legal Document</h1>
+      <p class="lead">Upload a contract or NDA. Receive a structured extraction with a fully verifiable provenance record.</p>
+      <p class="sublead">Legal teams cannot afford hallucinated claims in review workflows. This system exposes the document hash, engine lineage, governance mapping, and neurosymbolic audit boundary for every result.</p>
+      <p class="sublead">What you get back is a provenance record you can inspect, store, print, and verify independently.</p>
+    </section>
+
+    <form class="upload-card" action="/v1/demo/result" method="post" enctype="multipart/form-data">
+      <label class="upload-area">
+        <span class="upload-title">Drop in a plain-text contract</span>
+        <span class="upload-copy">Plain text only (.txt). The demo keeps the analysis in memory for verification.</span>
+        <input type="file" name="file" accept=".txt" required>
+      </label>
+      <div class="domain-select">
+        <label>
+          <input type="radio" name="domain" value="legal_contract" checked>
+          <span>Legal Contract</span>
+        </label>
+        <label>
+          <input type="radio" name="domain" value="nda" disabled>
+          <span>NDA (metadata only in current pinned core)</span>
+        </label>
+      </div>
+      <button type="submit">Analyse Document</button>
+    </form>
+  </main>
+</body>
+</html>
