@@ -15,6 +15,12 @@ app = FastAPI(
     contact={"name": "IOTA VERBUM CORE", "url": "https://github.com/iotaverbum-core"},
 )
 
+
+@app.get("/")
+async def root():
+    return {"status": "ok"}
+
+
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, rate_limit_handler)
 app.mount("/static", StaticFiles(directory="static"), name="static")
