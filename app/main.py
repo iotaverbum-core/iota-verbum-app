@@ -1,5 +1,7 @@
-﻿from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 from slowapi.errors import RateLimitExceeded
 
 from app.limiter import limiter, rate_limit_handler
@@ -14,11 +16,33 @@ app = FastAPI(
     version="0.1.0",
     contact={"name": "IOTA VERBUM CORE", "url": "https://github.com/iotaverbum-core"},
 )
+templates = Jinja2Templates(directory="app/templates")
 
 
-@app.get("/")
-async def root():
-    return {"status": "ok"}
+def _wants_html(request: Request) -> bool:
+    accept = request.headers.get("accept", "").lower()
+    return "text/html" in accept and "application/json" not in accept
+
+
+@app.get("/", response_class=HTMLResponse)
+async def root(request: Request):
+    if _wants_html(request):
+        return templates.TemplateResponse(request, "index.html", {})
+    return JSONResponse({"status": "ok"})
+
+
+@app.exception_handler(404)
+async def not_found_handler(request: Request, exc):
+    if _wants_html(request):
+        return templates.TemplateResponse(request, "404.html", {}, status_code=404)
+    return JSONResponse({"detail": "Not Found"}, status_code=404)
+
+
+@app.exception_handler(Exception)
+async def unhandled_exception_handler(request: Request, exc: Exception):
+    if _wants_html(request):
+        return templates.TemplateResponse(request, "500.html", {}, status_code=500)
+    raise exc
 
 
 app.state.limiter = limiter

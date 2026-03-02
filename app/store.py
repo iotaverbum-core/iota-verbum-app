@@ -21,6 +21,13 @@ class RecordStore:
             return None
         return dict(record)
 
+    def find(self, record_id: str) -> tuple[str, dict[str, Any]] | None:
+        for tenant_id, tenant_records in self._store.items():
+            record = tenant_records.get(record_id)
+            if record is not None:
+                return tenant_id, dict(record)
+        return None
+
     def list_tenant(self, tenant_id: str) -> list[str]:
         return sorted(self._store.get(tenant_id, {}).keys())
 
