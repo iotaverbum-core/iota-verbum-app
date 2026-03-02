@@ -166,7 +166,7 @@ async def analyse(
 
 @router.get("/demo", response_class=HTMLResponse, include_in_schema=False)
 async def demo_page(request: Request):
-    return templates.TemplateResponse(request, "index.html", {})
+    return templates.TemplateResponse(request, "demo.html", {})
 
 
 @router.post("/demo/result", response_class=HTMLResponse, include_in_schema=False)

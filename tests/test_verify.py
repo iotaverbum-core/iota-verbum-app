@@ -40,3 +40,29 @@ def test_verify_returns_record_after_analyse():
     payload = verify.json()
     assert payload["verified"] is True
     assert payload["record_id"] == record_id
+
+
+def test_verify_returns_public_json_without_api_key():
+    analyse = client.post(
+        "/v1/analyse",
+        headers={"X-API-Key": "demo-key-iota-2026"},
+        files=_sample_upload(),
+        data={"domain": "legal_contract"},
+    )
+    assert analyse.status_code == 200
+    record_id = analyse.json()["record_id"]
+
+    verify = client.get(f"/v1/verify/{record_id}")
+    assert verify.status_code == 200
+    payload = verify.json()
+    assert payload["verified"] is True
+    assert payload["record_id"] == record_id
+
+
+def test_verify_html_page_renders_without_api_key():
+    response = client.get(
+        "/v1/verify/example-record",
+        headers={"Accept": "text/html"},
+    )
+    assert response.status_code == 200
+    assert "Verification pending" in response.text
