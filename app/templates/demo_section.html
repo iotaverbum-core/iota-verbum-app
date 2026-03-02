@@ -1,16 +1,9 @@
-{% extends "base.html" %}
-
-{% block title %}IOTA VERBUM CORE | Provenance Report{% endblock %}
-
-{% block content %}
-<section class="demo-section result-page">
+<section class="demo-section" id="analysis-workbench">
   <div class="shell">
     <div class="section-heading">
-      <span class="eyebrow">Provenance Report</span>
-      <h1 class="result-title">Provenance Report</h1>
-      <p class="hero-subtitle">Uploaded file: {{ filename or "document" }}</p>
+      <span class="eyebrow">Analysis Workbench</span>
+      <h2>Analyse a legal document and inspect the provenance chain</h2>
     </div>
-
     <div class="demo-layout">
       <section class="card upload-panel">
         <form id="analyse-form" action="/v1/demo/result" method="post" enctype="multipart/form-data">
@@ -21,19 +14,19 @@
             <div class="upload-divider"><span>or</span></div>
             <button class="button button-secondary" type="button" id="choose-file-button">Choose File</button>
             <input id="file-input" type="file" name="file" accept=".txt,.pdf,application/pdf" hidden required>
-            <p class="selected-file" id="selected-file">{{ filename or "No file selected" }}</p>
+            <p class="selected-file" id="selected-file">No file selected</p>
           </div>
 
           <div class="field-group">
             <span class="field-label">Document Type</span>
             <div class="pill-group" id="domain-toggle">
-              <button class="pill {% if domain == 'legal_contract' %}active{% endif %}" type="button" data-domain="legal_contract">Legal Contract</button>
-              <button class="pill {% if domain == 'nda' %}active{% endif %}" type="button" data-domain="nda">NDA</button>
+              <button class="pill active" type="button" data-domain="legal_contract">Legal Contract</button>
+              <button class="pill" type="button" data-domain="nda">NDA</button>
             </div>
-            <input id="domain-input" type="hidden" name="domain" value="{{ domain or 'legal_contract' }}">
+            <input id="domain-input" type="hidden" name="domain" value="legal_contract">
           </div>
 
-          <button class="button button-primary button-block" id="analyse-button" type="submit">
+          <button class="button button-primary button-block" id="analyse-button" type="submit" disabled>
             Analyse Document
           </button>
           <p class="inline-error" id="analyse-error" hidden></p>
@@ -41,8 +34,8 @@
       </section>
 
       <section class="results-panel">
-        <div class="card empty-state" id="results-empty" hidden>
-          <div class="empty-icon">?</div>
+        <div class="card empty-state" id="results-empty">
+          <div class="empty-icon">◎</div>
           <h3>Upload a document to see the provenance report</h3>
           <p>Results appear here after analysis</p>
         </div>
@@ -69,7 +62,7 @@
           </div>
         </div>
 
-        <div id="results-content">
+        <div id="results-content" hidden>
           <section class="card result-card" id="result-provenance"></section>
           <section class="card result-card" id="result-clauses"></section>
           <section class="card result-card" id="result-governance"></section>
@@ -79,6 +72,3 @@
     </div>
   </div>
 </section>
-
-<script id="server-result-data" type="application/json">{{ result_json | safe }}</script>
-{% endblock %}

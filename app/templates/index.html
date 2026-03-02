@@ -1,42 +1,95 @@
-﻿<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>IOTA VERBUM CORE - Legal Document Intelligence</title>
-  <link rel="stylesheet" href="/static/style.css">
-</head>
-<body>
-  <header class="hero-header">
-    <div class="logo">IOTA VERBUM CORE</div>
-    <div class="tagline">Deterministic Legal Intelligence · Neurosymbolic Provenance Architecture</div>
-  </header>
-  <main class="upload-page">
-    <section class="intro-card">
-      <h1>Analyse a Legal Document</h1>
-      <p class="lead">Upload a contract or NDA. Receive a structured extraction with a fully verifiable provenance record.</p>
-      <p class="sublead">Legal teams cannot afford hallucinated claims in review workflows. This system exposes the document hash, engine lineage, governance mapping, and neurosymbolic audit boundary for every result.</p>
-      <p class="sublead">What you get back is a provenance record you can inspect, store, print, and verify independently.</p>
-    </section>
+{% extends "base.html" %}
 
-    <form class="upload-card" action="/v1/demo/result" method="post" enctype="multipart/form-data">
-      <label class="upload-area">
-        <span class="upload-title">Drop in a plain-text contract</span>
-        <span class="upload-copy">Plain text only (.txt). The demo keeps the analysis in memory for verification.</span>
-        <input type="file" name="file" accept=".txt" required>
-      </label>
-      <div class="domain-select">
-        <label>
-          <input type="radio" name="domain" value="legal_contract" checked>
-          <span>Legal Contract</span>
-        </label>
-        <label>
-          <input type="radio" name="domain" value="nda" disabled>
-          <span>NDA (metadata only in current pinned core)</span>
-        </label>
+{% block title %}IOTA VERBUM CORE | Deterministic Legal Intelligence{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <div class="shell hero-shell">
+    <span class="badge badge-navy">Neurosymbolic &middot; Deterministic &middot; Verifiable</span>
+    <h1>Deterministic Legal Intelligence</h1>
+    <p class="hero-subtitle">
+      The only legal document AI system with a cryptographic provenance chain. Every
+      output is independently verifiable. No generative model in the extraction path.
+    </p>
+    <div class="hero-actions">
+      <a class="button button-primary" href="/v1/demo#analysis-workbench">Analyse a Document &rarr;</a>
+      <a class="button button-secondary" href="/docs" target="_blank" rel="noreferrer">View API Docs &rarr;</a>
+    </div>
+
+    <div class="status-strip" id="status-strip" aria-live="polite">
+      <div class="status-item">
+        <span class="status-label">API Status</span>
+        <strong id="status-version">&mdash;</strong>
       </div>
-      <button type="submit">Analyse Document</button>
-    </form>
-  </main>
-</body>
-</html>
+      <div class="status-item">
+        <span class="status-label">Boundary</span>
+        <strong id="status-boundary">&mdash;</strong>
+      </div>
+      <div class="status-item">
+        <span class="status-label">Languages</span>
+        <strong id="status-languages">&mdash;</strong>
+      </div>
+      <div class="status-item">
+        <span class="status-label">Uptime</span>
+        <strong id="status-uptime">&mdash;</strong>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="feature-section">
+  <div class="shell">
+    <div class="feature-grid">
+      <article class="card feature-card">
+        <div class="symbol-icon" aria-hidden="true"><span></span></div>
+        <h2>Neurosymbolic Architecture</h2>
+        <p>
+          Symbolic extraction engine with zero generative model in the analysis path.
+          Same input always produces identical output. Determinism contract: active.
+        </p>
+        <span class="badge badge-teal">symbolic_only</span>
+      </article>
+      <article class="card feature-card">
+        <h2>Cryptographic Provenance</h2>
+        <p>
+          Every output carries a SHA-256 hash of the source document. Any party can
+          independently verify that the result corresponds to the original without
+          trusting the vendor.
+        </p>
+        <span class="badge badge-navy">SHA-256 anchored</span>
+      </article>
+      <article class="card feature-card">
+        <h2>Governance Ready</h2>
+        <p>
+          EU AI Act article mapping, NIST RMF function, risk tier classification, and
+          audit_ready flag on every output. SOC 2 controls built.
+        </p>
+        <span class="badge badge-amber">SOC 2 ready</span>
+      </article>
+    </div>
+  </div>
+</section>
+
+{% include "demo_section.html" %}
+
+<section class="dark-strip">
+  <div class="shell dark-strip-grid">
+    <div>
+      <span>REST API</span>
+      <strong>v1 &middot; Authenticated &middot; Rate Limited</strong>
+    </div>
+    <div>
+      <span>Languages</span>
+      <strong>EN &middot; FR &middot; DE &middot; ES</strong>
+    </div>
+    <div>
+      <span>Provenance</span>
+      <strong>PostgreSQL &middot; Append-only</strong>
+    </div>
+    <div>
+      <span>Compliance</span>
+      <strong>EU AI Act &middot; NIST RMF &middot; SOC 2</strong>
+    </div>
+  </div>
+</section>
+{% endblock %}

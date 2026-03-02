@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}IOTA VERBUM CORE | Verify{% endblock %}
+
+{% block content %}
+<section class="verify-page" data-verify-page data-record-id="{{ record_id | default('', true) }}">
+  <div class="shell verify-shell">
+    <div class="verify-hero" id="verify-summary">
+      <div class="verify-symbol pending" id="verify-symbol">?</div>
+      <h1 id="verify-heading">Verification pending</h1>
+      <p id="verify-subtitle">Checking the stored provenance record.</p>
+    </div>
+
+    <div class="verify-meta" id="verify-count">Verified 0 times</div>
+
+    <div class="verify-missing card" id="verify-missing" hidden>
+      <h2>Record not found</h2>
+      <p>This record ID does not exist or has expired.</p>
+      <a class="button button-secondary" href="/v1/demo">Back to Analyse</a>
+    </div>
+
+    <div id="results-content" hidden>
+      <section class="card result-card" id="result-provenance"></section>
+      <section class="card result-card" id="result-clauses"></section>
+      <section class="card result-card" id="result-governance"></section>
+      <section class="card result-card" id="result-verify"></section>
+    </div>
+  </div>
+</section>
+{% endblock %}
