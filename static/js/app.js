@@ -139,18 +139,10 @@ async function playProcessingStages() {
   resetStages();
   for (const row of stages) {
     row.classList.add("active");
-    await sleep(400);
+    await sleep(250);
     row.classList.remove("active");
     row.classList.add("complete");
   }
-}
-
-function getInputFormat(data) {
-  const filename = String(data.filename || data.input_file || "");
-  if (filename.toLowerCase().endsWith(".pdf")) {
-    return "pdf";
-  }
-  return "txt";
 }
 
 function normalizeClauses(data) {
@@ -216,7 +208,57 @@ function rowMarkup(label, value, copyId, copyText) {
   `;
 }
 
-function renderResults(data) {
+function updateVerifySummary(payload, hasMismatch) {
+  const symbol = document.getElementById("verify-symbol");
+  const heading = document.getElementById("verify-heading");
+  const subtitle = document.getElementById("verify-subtitle");
+  const count = document.getElementById("verify-count");
+  const missing = document.getElementById("verify-missing");
+  const content = document.getElementById("results-content");
+
+  if (payload) {
+    if (symbol) {
+      symbol.className = `verify-symbol ${hasMismatch ? "error" : "success"}`;
+      symbol.textContent = hasMismatch ? "X" : "OK";
+    }
+    if (heading) {
+      heading.textContent = hasMismatch ? "Mismatch detected" : "Verified";
+    }
+    if (subtitle) {
+      subtitle.textContent = hasMismatch
+        ? "The supplied file or provenance payload does not match the stored record."
+        : "Stored record and supplied inputs are consistent.";
+    }
+    if (count) {
+      count.textContent = `Verified ${payload.verified_count || 0} times`;
+    }
+    if (missing) {
+      missing.hidden = true;
+    }
+    if (content) {
+      content.hidden = false;
+    }
+  } else {
+    if (symbol) {
+      symbol.className = "verify-symbol error";
+      symbol.textContent = "X";
+    }
+    if (heading) {
+      heading.textContent = "Record not found";
+    }
+    if (subtitle) {
+      subtitle.textContent = "This record ID does not exist or is no longer available in memory.";
+    }
+    if (missing) {
+      missing.hidden = false;
+    }
+    if (content) {
+      content.hidden = true;
+    }
+  }
+}
+
+function renderResults(data, verificationPayload) {
   const provenance = document.getElementById("result-provenance");
   const clauses = document.getElementById("result-clauses");
   const governance = document.getElementById("result-governance");
@@ -229,10 +271,10 @@ function renderResults(data) {
   const documentHash = data.document_hash || data.provenance_hash || "Unavailable";
   const timestamp = (data.provenance_meta && data.provenance_meta.timestamp) || data.timestamp || "Unavailable";
   const language = data.language || "unknown";
-  const boundary = data.neurosymbolic_boundary ? "symbolic_only" : "symbolic_only";
-  const inputFormat = getInputFormat(data);
+  const boundary = data.neurosymbolic_boundary ? "symbolic_only" : "unknown";
   const clauseItems = normalizeClauses(data);
   const governanceData = data.governance_metadata || {};
+  const verification = verificationPayload || {};
 
   provenance.innerHTML = `
     <div class="result-header">
@@ -243,11 +285,13 @@ function renderResults(data) {
     </div>
     ${rowMarkup("Record ID", `<code id="copy-record-id">${recordId}</code>`, "copy-record-id")}
     ${rowMarkup("Document Hash", `<code id="copy-document-hash">${documentHash}</code>`, "copy-document-hash")}
+    ${rowMarkup("Provenance Hash", `<code id="copy-provenance-hash">${data.provenance_hash || "Unavailable"}</code>`, "copy-provenance-hash")}
     ${rowMarkup("Timestamp", `<span>${timestamp}</span>`)}
-    ${rowMarkup("Language", `<span>${language} confidence: deterministic</span>`)}
+    ${rowMarkup("Language", `<span>${language}</span>`)}
     ${rowMarkup("Boundary", `<span class="badge badge-teal">${boundary}</span>`)}
-    ${rowMarkup("Input Format", `<span class="badge badge-navy">${inputFormat}</span>`)}
+    ${rowMarkup("Template", `<span>${data.template_id || "Unavailable"}</span>`)}
     <a class="result-link" id="verify-link" href="/v1/verify/${recordId}">Verify this record &rarr;</a>
+    <a class="result-link" href="/v1/records/${recordId}">View stored JSON &rarr;</a>
   `;
 
   clauses.innerHTML = `
@@ -285,7 +329,9 @@ function renderResults(data) {
     ${rowMarkup("EU AI Act", `<span>${governanceData.eu_ai_act_article || "Unavailable"}</span>`)}
     ${rowMarkup("NIST RMF", `<span class="badge badge-navy">${governanceData.nist_rmf_function || "Unavailable"}</span>`)}
     ${rowMarkup("Risk Tier", `<span class="badge ${riskTierClass(governanceData.risk_tier)}">${governanceData.risk_tier || "Unavailable"}</span>`)}
-    ${rowMarkup("Audit Ready", `<span>${governanceData.audit_ready ? "Yes" : "No"}</span>`)}
+    ${rowMarkup("Audit Support", `<span>${governanceData.audit_support ? "Yes" : "No"}</span>`)}
+    ${rowMarkup("Mapping Basis", `<span>${governanceData.mapping_basis || "Unavailable"}</span>`)}
+    ${rowMarkup("Mapping Confidence", `<span>${governanceData.mapping_confidence || "Unavailable"}</span>`)}
   `;
 
   verify.innerHTML = `
@@ -294,11 +340,11 @@ function renderResults(data) {
         <h3>Independent Verification</h3>
       </div>
     </div>
-    <p>Verify that this output corresponds to the original document.</p>
+    <p>Verify that this output corresponds to the original document. Stored records are ephemeral for the current app process.</p>
     <div class="verify-inline">
       <input id="verify-record-id" type="text" value="${recordId}">
       <button class="button button-primary" id="verify-button" type="button">Verify Record</button>
-      <div class="verify-result" id="verify-result"></div>
+      <div class="verify-result ${verification.verified === false ? "error" : "success"}" id="verify-result">${verification.record_id ? (verification.verified ? "Verified." : "Mismatch detected.") : ""}</div>
     </div>
   `;
 
@@ -332,8 +378,6 @@ async function analyseDocument(event) {
   showResultsState("processing");
   const file = input.files[0];
   const formData = new FormData();
-  formData.append("document", file);
-  formData.append("document_type", selectedDomain);
   formData.append("file", file);
   formData.append("domain", selectedDomain);
   await playProcessingStages();
@@ -363,82 +407,62 @@ async function analyseDocument(event) {
   }
 }
 
-async function verifyRecord(recordId) {
+async function verifyRecord(recordId, options = {}) {
   const resultNode = document.getElementById("verify-result");
-  const verifyPage = document.querySelector("[data-verify-page]");
-  const summary = {
-    symbol: document.getElementById("verify-symbol"),
-    heading: document.getElementById("verify-heading"),
-    subtitle: document.getElementById("verify-subtitle"),
-    count: document.getElementById("verify-count"),
-    missing: document.getElementById("verify-missing"),
-    content: document.getElementById("results-content"),
-  };
-
   if (!recordId) {
-    return;
+    return null;
   }
 
   try {
-    const response = await fetch(`/v1/verify/${encodeURIComponent(recordId)}`, {
-      headers: {
-        "X-API-Key": "demo-key-iota-2026",
-      },
-    });
-    if (!response.ok) {
-      throw new Error(response.status === 404 ? "Record not found" : "Verification failed");
+    let payload;
+    if (options.file || options.provenanceJson) {
+      const formData = new FormData();
+      formData.append("record_id", recordId);
+      if (options.provenanceJson) {
+        formData.append("provenance_json", options.provenanceJson);
+      }
+      if (options.file) {
+        formData.append("file", options.file);
+      }
+      const response = await fetch("/v1/verify", {
+        method: "POST",
+        body: formData,
+        headers: {
+          Accept: "application/json",
+        },
+      });
+      if (!response.ok) {
+        const errorPayload = await response.json().catch(() => ({}));
+        throw new Error(errorPayload.detail || "Verification failed");
+      }
+      payload = await response.json();
+    } else {
+      const response = await fetch(`/v1/verify/${encodeURIComponent(recordId)}`, {
+        headers: {
+          Accept: "application/json",
+          "X-API-Key": "demo-key-iota-2026",
+        },
+      });
+      if (!response.ok) {
+        const errorPayload = await response.json().catch(() => ({}));
+        throw new Error(errorPayload.detail || "Verification failed");
+      }
+      payload = await response.json();
     }
-    const data = await response.json();
+
     if (resultNode) {
-      resultNode.textContent = "Verified. Output matches the stored record.";
-      resultNode.className = "verify-result success";
+      resultNode.textContent = payload.verified ? "Verified." : "Mismatch detected.";
+      resultNode.className = `verify-result ${payload.verified ? "success" : "error"}`;
     }
-    if (verifyPage) {
-      if (summary.symbol) {
-        summary.symbol.className = "verify-symbol success";
-        summary.symbol.textContent = "OK";
-      }
-      if (summary.heading) {
-        summary.heading.textContent = "Verified";
-      }
-      if (summary.subtitle) {
-        summary.subtitle.textContent = "Output matches source document";
-      }
-      if (summary.count) {
-        summary.count.textContent = "Verified 1 times";
-      }
-      if (summary.missing) {
-        summary.missing.hidden = true;
-      }
-      if (summary.content) {
-        summary.content.hidden = false;
-      }
-      renderResults(data.record || data);
-    }
-    return data;
+    updateVerifySummary(payload, !payload.verified);
+    renderResults(payload.record || payload, payload);
+    return payload;
   } catch (verifyError) {
     if (resultNode) {
       resultNode.textContent = verifyError.message;
       resultNode.className = "verify-result error";
     }
-    if (verifyPage) {
-      if (summary.symbol) {
-        summary.symbol.className = "verify-symbol error";
-        summary.symbol.textContent = "X";
-      }
-      if (summary.heading) {
-        summary.heading.textContent = "Mismatch detected";
-      }
-      if (summary.subtitle) {
-        summary.subtitle.textContent = "Hash does not match stored record";
-      }
-      if (summary.missing) {
-        summary.missing.hidden = false;
-      }
-      if (summary.content) {
-        summary.content.hidden = true;
-      }
-    }
+    updateVerifySummary(null, true);
     return null;
   }
 }
@@ -487,15 +511,33 @@ function initAnalyseForm() {
   form.addEventListener("submit", analyseDocument);
 }
 
+function initVerifyForm() {
+  const form = document.getElementById("verify-form");
+  if (!form) {
+    return;
+  }
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const recordIdInput = document.getElementById("verify-form-record-id");
+    const provenanceInput = document.getElementById("verify-form-provenance");
+    const fileInput = document.getElementById("verify-form-file");
+    const file = fileInput && fileInput.files ? fileInput.files[0] : null;
+    await verifyRecord(recordIdInput ? recordIdInput.value.trim() : "", {
+      provenanceJson: provenanceInput ? provenanceInput.value.trim() : "",
+      file,
+    });
+  });
+}
+
 function initVerifyPage() {
   const page = document.querySelector("[data-verify-page]");
   if (!page) {
     return;
   }
   const explicitRecordId = page.getAttribute("data-record-id");
-  const pathRecordId = window.location.pathname.split("/").filter(Boolean).pop();
-  const recordId = explicitRecordId || pathRecordId;
-  verifyRecord(recordId);
+  if (explicitRecordId) {
+    verifyRecord(explicitRecordId);
+  }
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -505,5 +547,6 @@ document.addEventListener("DOMContentLoaded", () => {
   initAnalyseForm();
   initServerRenderedResults();
   initCopyButtons();
+  initVerifyForm();
   initVerifyPage();
 });

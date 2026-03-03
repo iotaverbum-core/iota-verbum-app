@@ -1,3 +1,3 @@
-﻿from app.routes import analyse, domains, health, verify
+from app.routes import analyse, domains, health, records, verify
 
-__all__ = ['analyse', 'domains', 'health', 'verify']
+__all__ = ["analyse", "domains", "health", "records", "verify"]

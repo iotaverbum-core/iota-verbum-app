@@ -8,8 +8,8 @@
     <span class="badge badge-navy">Neurosymbolic &middot; Deterministic &middot; Verifiable</span>
     <h1>Deterministic Legal Intelligence</h1>
     <p class="hero-subtitle">
-      The only legal document AI system with a cryptographic provenance chain. Every
-      output is independently verifiable. No generative model in the extraction path.
+      Deterministic legal document analysis with a reproducible provenance chain.
+      Every output can be verified independently. No generative model is used in the extraction path.
     </p>
     <div class="hero-actions">
       <a class="button button-primary" href="/v1/demo#analysis-workbench">Analyse a Document &rarr;</a>
@@ -44,27 +44,23 @@
         <div class="symbol-icon" aria-hidden="true"><span></span></div>
         <h2>Neurosymbolic Architecture</h2>
         <p>
-          Symbolic extraction engine with zero generative model in the analysis path.
-          Same input always produces identical output. Determinism contract: active.
+          Symbolic extraction rules produce the same output for the same input. The analysis path is deterministic and auditable.
         </p>
         <span class="badge badge-teal">symbolic_only</span>
       </article>
       <article class="card feature-card">
         <h2>Cryptographic Provenance</h2>
         <p>
-          Every output carries a SHA-256 hash of the source document. Any party can
-          independently verify that the result corresponds to the original without
-          trusting the vendor.
+          Each result carries a source document hash and a provenance hash so the record can be rechecked offline.
         </p>
         <span class="badge badge-navy">SHA-256 anchored</span>
       </article>
       <article class="card feature-card">
-        <h2>Governance Ready</h2>
+        <h2>Governance Mapping</h2>
         <p>
-          EU AI Act article mapping, NIST RMF function, risk tier classification, and
-          audit_ready flag on every output. SOC 2 controls built.
+          Governance metadata accompanies every result to support review workflows. It is an operational aid and not legal advice.
         </p>
-        <span class="badge badge-amber">SOC 2 ready</span>
+        <span class="badge badge-amber">Workflow support</span>
       </article>
     </div>
   </div>
@@ -79,16 +75,16 @@
       <strong>v1 &middot; Authenticated &middot; Rate Limited</strong>
     </div>
     <div>
-      <span>Languages</span>
-      <strong>EN &middot; FR &middot; DE &middot; ES</strong>
+      <span>Inputs</span>
+      <strong>TXT only &middot; UTF-8 plain text</strong>
     </div>
     <div>
-      <span>Provenance</span>
-      <strong>PostgreSQL &middot; Append-only</strong>
+      <span>Storage</span>
+      <strong>In-memory &middot; Ephemeral</strong>
     </div>
     <div>
-      <span>Compliance</span>
-      <strong>EU AI Act &middot; NIST RMF &middot; SOC 2</strong>
+      <span>Governance</span>
+      <strong>Mapped metadata &middot; Review support</strong>
     </div>
   </div>
 </section>

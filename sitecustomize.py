@@ -13,4 +13,12 @@ def _add_local_venv_site_packages() -> None:
             sys.path.insert(0, site_packages)
 
 
+def _configure_pycache_prefix() -> None:
+    root = Path(__file__).resolve().parent
+    pycache_root = root / ".pycache"
+    pycache_root.mkdir(parents=True, exist_ok=True)
+    sys.pycache_prefix = str(pycache_root)
+
+
 _add_local_venv_site_packages()
+_configure_pycache_prefix()

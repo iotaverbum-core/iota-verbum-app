@@ -43,6 +43,10 @@ select {
   font: inherit;
 }
 
+textarea {
+  font: inherit;
+}
+
 .shell {
   width: min(1120px, calc(100% - 32px));
   margin: 0 auto;
@@ -439,6 +443,13 @@ h3,
   color: var(--red);
 }
 
+.helper-text,
+.verify-disclaimer {
+  margin: 12px 0 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
 .results-panel {
   display: grid;
   gap: 16px;
@@ -624,7 +635,22 @@ input[type="url"] {
   background: var(--surface);
 }
 
+textarea {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px;
+  background: var(--surface);
+  resize: vertical;
+}
+
 input:focus {
+  outline: none;
+  border-color: var(--steel);
+  box-shadow: 0 0 0 3px rgba(46, 95, 138, 0.15);
+}
+
+textarea:focus {
   outline: none;
   border-color: var(--steel);
   box-shadow: 0 0 0 3px rgba(46, 95, 138, 0.15);
@@ -641,6 +667,10 @@ input:focus {
 .verify-shell,
 .error-shell {
   max-width: 900px;
+}
+
+.verify-form-card {
+  margin-bottom: 24px;
 }
 
 .verify-hero {

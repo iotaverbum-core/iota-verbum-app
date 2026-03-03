@@ -1,4 +1,6 @@
-﻿from pathlib import Path
+import json
+import re
+from pathlib import Path
 
 from fastapi.testclient import TestClient
 
@@ -26,9 +28,11 @@ def test_post_analyse_returns_full_provenance_record():
     assert payload["tenant_id"] == "demo"
     assert payload["language"]
     assert payload["governance_metadata"]["audit_ready"] is True
+    assert payload["governance_metadata"]["audit_support"] is True
     assert payload["neurosymbolic_boundary"]["neural_components_used"] == []
     assert payload["document_hash"].startswith("sha256:")
     assert payload["provenance_hash"].startswith("sha256:")
+    assert payload["template_id"].startswith("legal_contract/")
 
 
 def test_post_analyse_no_api_key_returns_401():
@@ -73,7 +77,7 @@ def test_identical_requests_share_same_provenance_hash():
     assert first.json()["provenance_hash"] == second.json()["provenance_hash"]
 
 
-def test_demo_page_renders_result():
+def test_demo_page_renders_result_and_persists_record():
     page = client.get("/v1/demo")
     assert page.status_code == 200
 
@@ -84,3 +88,33 @@ def test_demo_page_renders_result():
     )
     assert result.status_code == 200
     assert "Provenance Report" in result.text
+    match = re.search(r'<script id="server-result-data" type="application/json">(.*?)</script>', result.text, re.S)
+    assert match
+    payload = json.loads(match.group(1))
+    verify = client.get(f"/v1/verify/{payload['record_id']}", headers={"Accept": "application/json"})
+    assert verify.status_code == 200
+
+
+def test_analyse_uses_configured_work_dir(monkeypatch, tmp_path):
+    monkeypatch.setenv("IV_WORK_DIR", str(tmp_path / "iv-work"))
+    response = client.post(
+        "/v1/analyse",
+        headers={"X-API-Key": "demo-key-iota-2026"},
+        files=_sample_upload(),
+        data={"domain": "legal_contract"},
+    )
+    assert response.status_code == 200
+    work_root = tmp_path / "iv-work"
+    assert work_root.exists()
+    assert list(work_root.iterdir()) == []
+
+
+def test_analyse_rejects_non_text_upload():
+    response = client.post(
+        "/v1/analyse",
+        headers={"X-API-Key": "demo-key-iota-2026"},
+        files={"file": ("sample_contract.pdf", b"%PDF-1.4", "application/pdf")},
+        data={"domain": "legal_contract"},
+    )
+    assert response.status_code == 400
+    assert "txt" in response.json()["detail"].lower()

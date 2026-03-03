@@ -17,10 +17,10 @@
           <div class="upload-zone" id="upload-zone" tabindex="0">
             <div class="upload-icon" aria-hidden="true"><span>&uarr;</span></div>
             <h3>Drop your document here</h3>
-            <p>PDF and plain text supported (.pdf, .txt)</p>
+            <p>Plain text supported (.txt)</p>
             <div class="upload-divider"><span>or</span></div>
             <button class="button button-secondary" type="button" id="choose-file-button">Choose File</button>
-            <input id="file-input" type="file" name="file" accept=".txt,.pdf,application/pdf" hidden required>
+            <input id="file-input" type="file" name="file" accept=".txt,text/plain" hidden required>
             <p class="selected-file" id="selected-file">{{ filename or "No file selected" }}</p>
           </div>
 
@@ -33,6 +33,7 @@
             <input id="domain-input" type="hidden" name="domain" value="{{ domain or 'legal_contract' }}">
           </div>
 
+          <p class="helper-text">Records created in the demo are stored in memory for the current app process only.</p>
           <button class="button button-primary button-block" id="analyse-button" type="submit">
             Analyse Document
           </button>
@@ -42,7 +43,7 @@
 
       <section class="results-panel">
         <div class="card empty-state" id="results-empty" hidden>
-          <div class="empty-icon">?</div>
+          <div class="empty-icon">O</div>
           <h3>Upload a document to see the provenance report</h3>
           <p>Results appear here after analysis</p>
         </div>
