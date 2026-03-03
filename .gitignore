@@ -1,6 +1,9 @@
-﻿.venv/
+.venv/
 __pycache__/
 *.pyc
+.pytest_cache/
 .env
 uploads/
 outputs/
+tmp_test/
+examples/*.tampered.json

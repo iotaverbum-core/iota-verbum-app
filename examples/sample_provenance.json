@@ -1,0 +1,43 @@
+{
+  "record_id": "11111111-2222-3333-4444-555555555555",
+  "tenant_id": "demo",
+  "language": "en",
+  "api_version": "v1",
+  "document_hash": "sha256:3e23267e6ff6c1f0988e2b402e498258b4e9e210169cab2314d339cce8ab571c",
+  "template_id": "legal_contract/generic@1.0",
+  "template_sha256": "sha256:sample-template",
+  "governance_metadata": {
+    "eu_ai_act_article": "Article 13 - Transparency obligations",
+    "nist_rmf_function": "GOVERN",
+    "risk_tier": "high",
+    "audit_support": true,
+    "audit_ready": true,
+    "mapping_basis": "Domain metadata only; not a legal compliance determination.",
+    "mapping_confidence": "medium"
+  },
+  "neurosymbolic_boundary": {
+    "symbolic_components_used": [
+      "legal_contract_extractor_v1",
+      "schema_validator_v1",
+      "governance_mapper_v1"
+    ],
+    "neural_components_used": [],
+    "neural_override_count": 0,
+    "symbolic_confidence": "high",
+    "boundary_version": "1.0"
+  },
+  "provenance_meta": {
+    "timestamp": "2026-03-03T00:00:00+00:00",
+    "commit_ref": "v0.2.1-neurosymbolic"
+  },
+  "clauses": [
+    {
+      "type": "parties",
+      "englishType": "Parties",
+      "text": "[REDACTED SAMPLE CONTRACT TEXT]",
+      "confidence": 1.0,
+      "rule_id": "rule:sample"
+    }
+  ],
+  "provenance_hash": "sha256:2946a54eeb41710f09a1fd729bb3ab21c4e02764beb002727a475b9952d00796"
+}

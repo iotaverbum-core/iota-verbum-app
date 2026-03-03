@@ -5,10 +5,22 @@
 {% block content %}
 <section class="verify-page" data-verify-page data-record-id="{{ record_id | default('', true) }}">
   <div class="shell verify-shell">
+    <div class="card verify-form-card">
+      <h2>Verify a provenance record</h2>
+      <p>Enter a record ID to retrieve a stored record. Optional inputs let you compare a local text file or provenance JSON against the stored hashes.</p>
+      <form id="verify-form" class="verify-inline">
+        <input id="verify-form-record-id" type="text" name="record_id" value="{{ record_id | default('', true) }}" placeholder="Enter record ID">
+        <textarea id="verify-form-provenance" name="provenance_json" rows="6" placeholder="Optional provenance JSON"></textarea>
+        <input id="verify-form-file" type="file" name="file" accept=".txt,text/plain">
+        <button class="button button-primary" id="verify-form-button" type="submit">Verify Record</button>
+      </form>
+      <p class="verify-disclaimer">Governance mapping aids workflows and is not legal advice. Records are stored in memory for the current app process only.</p>
+    </div>
+
     <div class="verify-hero" id="verify-summary">
       <div class="verify-symbol pending" id="verify-symbol">?</div>
       <h1 id="verify-heading">Verification pending</h1>
-      <p id="verify-subtitle">Checking the stored provenance record.</p>
+      <p id="verify-subtitle">Provide a record ID to verify a stored record.</p>
     </div>
 
     <div class="verify-meta" id="verify-count">Verified 0 times</div>

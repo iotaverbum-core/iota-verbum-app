@@ -12,6 +12,8 @@ def test_health_returns_200():
     assert payload["status"] == "healthy"
     assert payload["determinism_contract"] == "active"
     assert payload["neurosymbolic_boundary"] == "symbolic_only"
+    assert payload["storage"] == "in_memory_ephemeral"
+    assert payload["pdf_parsing"] == "inactive"
 
 
 def test_docs_renders_openapi_page():

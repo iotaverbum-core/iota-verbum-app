@@ -2,6 +2,8 @@ from datetime import datetime, timezone
 
 from fastapi import APIRouter
 
+from app.store import record_store
+
 router = APIRouter()
 START_TIME = datetime.now(timezone.utc)
 
@@ -17,6 +19,7 @@ def _uptime_seconds() -> float:
     description="Returns system status and production capability flags.",
 )
 async def health() -> dict:
+    storage = record_store.storage_summary()
     return {
         "status": "healthy",
         "version": "v0.3.0-production",
@@ -24,11 +27,12 @@ async def health() -> dict:
         "uptime_seconds": _uptime_seconds(),
         "determinism_contract": "active",
         "neurosymbolic_boundary": "symbolic_only",
-        "storage": "postgresql",
-        "pdf_parsing": "active",
+        "storage": storage["mode"],
+        "pdf_parsing": "inactive",
         "languages_supported": ["en", "fr", "de", "es"],
-        "soc2_controls": "active",
+        "soc2_controls": "documented_controls_only",
         "domains_available": ["legal_contract", "nda"],
+        "storage_record_count": storage["record_count"],
         "timestamp": datetime.now(timezone.utc).isoformat(),
     }
 
@@ -39,13 +43,17 @@ async def health() -> dict:
     description="Returns operational status for core API components.",
 )
 async def status() -> dict:
+    storage = record_store.storage_summary()
     return {
         "status": "operational",
         "uptime_seconds": _uptime_seconds(),
+        "storage_mode": storage["mode"],
+        "storage_record_count": storage["record_count"],
         "components": {
             "api": "operational",
-            "database": "operational",
-            "pdf_parsing": "operational",
+            "database": "ephemeral_in_memory",
+            "pdf_parsing": "inactive",
             "language_detection": "operational",
+            "rate_limit": "operational",
         },
     }

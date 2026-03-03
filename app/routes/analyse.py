@@ -1,14 +1,12 @@
-﻿import hashlib
+import hashlib
 import importlib.metadata
 import json
-import tempfile
 import unicodedata
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Annotated
 
-from core import attestation
 from core.pipeline import DeterministicPipeline
 from deterministic_ai import DOMAIN_REGISTRY
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, UploadFile
@@ -19,11 +17,16 @@ from langdetect import LangDetectException, detect
 from app.auth import API_KEYS, get_tenant
 from app.governance import GOVERNANCE_MAP
 from app.limiter import limiter
+from app.provenance import compute_provenance_hash
 from app.store import record_store
+from app.workdir import cleanup_work_subdir, create_work_subdir
 
 router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
 SUPPORTED_DOMAINS = {"legal_contract"}
+SUPPORTED_TEXT_SUFFIXES = {".txt"}
+SUPPORTED_TEXT_CONTENT_TYPES = {"", "application/octet-stream", "text/plain"}
+MAX_UPLOAD_BYTES = 2 * 1024 * 1024
 
 
 def get_commit_ref() -> str:
@@ -54,14 +57,35 @@ def build_boundary(domain: str) -> dict:
     }
 
 
-def compute_provenance_hash(result: dict) -> str:
-    canonical = dict(result)
-    canonical.pop("record_id", None)
-    provenance_meta = dict(canonical.get("provenance_meta", {}))
-    provenance_meta.pop("timestamp", None)
-    canonical["provenance_meta"] = provenance_meta
-    payload = attestation.canonicalize_json(canonical)
-    return "sha256:" + attestation.compute_sha256(payload)
+def template_metadata(result: dict) -> dict:
+    template_path = str(result.get("template_path", "") or "").replace("\\", "/")
+    template_name = Path(template_path).stem or "generic"
+    template_id = f"legal_contract/{template_name}@1.0"
+    return {
+        "template_id": template_id,
+        "template_sha256": result.get("template_sha256", ""),
+    }
+
+
+def validate_upload(filename: str, content_type: str | None, content: bytes) -> None:
+    suffix = Path(filename or "").suffix.lower()
+    if suffix not in SUPPORTED_TEXT_SUFFIXES:
+        raise HTTPException(
+            status_code=400,
+            detail="Unsupported file type. Analysis currently supports UTF-8 text files (.txt) only.",
+        )
+    if (content_type or "") not in SUPPORTED_TEXT_CONTENT_TYPES:
+        raise HTTPException(
+            status_code=400,
+            detail="Unsupported content type. Upload a plain text document with .txt extension.",
+        )
+    if not content:
+        raise HTTPException(status_code=400, detail="Uploaded file is empty.")
+    if len(content) > MAX_UPLOAD_BYTES:
+        raise HTTPException(
+            status_code=413,
+            detail=f"Uploaded file exceeds the {MAX_UPLOAD_BYTES} byte limit.",
+        )
 
 
 def run_core_extraction(
@@ -80,7 +104,8 @@ def run_core_extraction(
         domain_config["extractor"],
         domain_config["templates"],
     )
-    with tempfile.TemporaryDirectory() as tmp_dir:
+    work_dir = create_work_subdir("analysis")
+    try:
         result = pipeline.process(
             input_ref=Path(filename or "upload.txt").stem or "upload",
             input_data=document_text,
@@ -90,7 +115,7 @@ def run_core_extraction(
                 "source": "api_v1",
                 "context": context,
             },
-            output_dir=Path(tmp_dir),
+            output_dir=work_dir,
             input_meta={
                 "input_file": filename,
                 "document_hash": document_hash,
@@ -100,7 +125,34 @@ def run_core_extraction(
                 "commit_ref": commit_ref,
             },
         )
+    finally:
+        cleanup_work_subdir(work_dir)
     return result["output_data"], result["provenance"]
+
+
+def build_result(
+    output_data: dict,
+    provenance: dict,
+    *,
+    tenant_id: str,
+    language: str,
+    document_hash: str,
+    domain: str,
+) -> dict:
+    result = {
+        **output_data,
+        **provenance,
+        "record_id": str(uuid.uuid4()),
+        "tenant_id": tenant_id,
+        "language": language,
+        "api_version": "v1",
+        "document_hash": document_hash,
+        "governance_metadata": GOVERNANCE_MAP[domain],
+        "neurosymbolic_boundary": build_boundary(domain),
+    }
+    result.update(template_metadata(result))
+    result["provenance_hash"] = compute_provenance_hash(result)
+    return result
 
 
 @router.post(
@@ -123,6 +175,7 @@ async def analyse(
         )
 
     content = await file.read()
+    validate_upload(file.filename or "", file.content_type, content)
     document_hash = "sha256:" + hashlib.sha256(content).hexdigest()
 
     try:
@@ -147,18 +200,14 @@ async def analyse(
         context=context,
     )
 
-    result = {
-        **output_data,
-        **provenance,
-        "record_id": str(uuid.uuid4()),
-        "tenant_id": tenant_id,
-        "language": language,
-        "api_version": "v1",
-        "document_hash": document_hash,
-        "governance_metadata": GOVERNANCE_MAP[domain],
-        "neurosymbolic_boundary": build_boundary(domain),
-    }
-    result["provenance_hash"] = compute_provenance_hash(result)
+    result = build_result(
+        output_data,
+        provenance,
+        tenant_id=tenant_id,
+        language=language,
+        document_hash=document_hash,
+        domain=domain,
+    )
 
     record_store.save(tenant_id, result["record_id"], result)
     return result
@@ -183,6 +232,7 @@ async def demo_result(
         )
 
     content = await file.read()
+    validate_upload(file.filename or "", file.content_type, content)
     document_hash = "sha256:" + hashlib.sha256(content).hexdigest()
     try:
         document_text = content.decode("utf-8")
@@ -202,21 +252,18 @@ async def demo_result(
         timestamp=timestamp,
         commit_ref=commit_ref,
         filename=file.filename or "upload.txt",
-        context="",
+        context="demo",
     )
 
-    result = {
-        **output_data,
-        **provenance,
-        "record_id": str(uuid.uuid4()),
-        "tenant_id": tenant["tenant_id"],
-        "language": language,
-        "api_version": "v1",
-        "document_hash": document_hash,
-        "governance_metadata": GOVERNANCE_MAP[domain],
-        "neurosymbolic_boundary": build_boundary(domain),
-    }
-    result["provenance_hash"] = compute_provenance_hash(result)
+    result = build_result(
+        output_data,
+        provenance,
+        tenant_id=tenant["tenant_id"],
+        language=language,
+        document_hash=document_hash,
+        domain=domain,
+    )
+    record_store.save(tenant["tenant_id"], result["record_id"], result)
 
     return templates.TemplateResponse(
         request,
@@ -228,6 +275,3 @@ async def demo_result(
             "result_json": json.dumps(result, indent=2, sort_keys=True),
         },
     )
-
-
-
