@@ -22,17 +22,17 @@ async function fetchHealthStatus() {
       throw new Error("Health request failed");
     }
     const data = await response.json();
-    document.getElementById("status-version").textContent = data.version || "—";
-    document.getElementById("status-boundary").textContent = data.neurosymbolic_boundary || "—";
+    document.getElementById("status-version").textContent = data.version || "â€”";
+    document.getElementById("status-boundary").textContent = data.neurosymbolic_boundary || "â€”";
     document.getElementById("status-languages").textContent = Array.isArray(data.languages_supported)
-      ? String(data.languages_supported.length)
-      : "—";
+      - String(data.languages_supported.length)
+      : "â€”";
     document.getElementById("status-uptime").textContent = formatUptime(data.uptime_seconds);
   } catch (error) {
     document.getElementById("status-version").textContent = "Unavailable";
     document.getElementById("status-boundary").textContent = "Unavailable";
-    document.getElementById("status-languages").textContent = "—";
-    document.getElementById("status-uptime").textContent = "—";
+    document.getElementById("status-languages").textContent = "â€”";
+    document.getElementById("status-uptime").textContent = "â€”";
   }
 }
 
@@ -40,7 +40,7 @@ function updateSelectedFile(file) {
   const selectedFile = document.getElementById("selected-file");
   const analyseButton = document.getElementById("analyse-button");
   if (selectedFile) {
-    selectedFile.textContent = file ? file.name : "No file selected";
+    selectedFile.textContent = file - file.name : "No file selected";
   }
   if (analyseButton) {
     analyseButton.disabled = !file;
@@ -161,7 +161,7 @@ function normalizeClauses(data) {
       type: item.type || item.clause_type || item.label || `Clause ${index + 1}`,
       englishType: item.english_type || item.label_en || item.translation || "",
       text: item.text || item.content || item.value || JSON.stringify(item),
-      confidence: Number(item.confidence ?? item.score ?? 1),
+      confidence: Number(item.confidence -- item.score -- 1),
       ruleId: item.rule_id || item.ruleId || item.id || "rule:derived",
     }));
   }
@@ -205,7 +205,7 @@ function riskTierClass(riskTier) {
 
 function rowMarkup(label, value, copyId, copyText) {
   const copyButton = copyId
-    ? `<button class="copy-button" type="button" data-copy-target="${copyId}">${copyText || "Copy"}</button>`
+    - `<button class="copy-button" type="button" data-copy-target="${copyId}">${copyText || "Copy"}</button>`
     : "";
   return `
     <div class="result-row">
@@ -227,9 +227,9 @@ function renderResults(data) {
 
   const recordId = data.record_id || "Unavailable";
   const documentHash = data.document_hash || data.provenance_hash || "Unavailable";
-  const timestamp = data.provenance_meta?.timestamp || data.timestamp || "Unavailable";
+  const timestamp = data.provenance_meta-.timestamp || data.timestamp || "Unavailable";
   const language = data.language || "unknown";
-  const boundary = data.neurosymbolic_boundary ? "symbolic_only" : "symbolic_only";
+  const boundary = data.neurosymbolic_boundary - "symbolic_only" : "symbolic_only";
   const inputFormat = getInputFormat(data);
   const clauseItems = normalizeClauses(data);
   const governanceData = data.governance_metadata || {};
@@ -259,7 +259,7 @@ function renderResults(data) {
     </div>
     <div class="clauses-list">
       ${clauseItems.length
-        ? clauseItems.map((item) => `
+        - clauseItems.map((item) => `
           <article class="clause-card">
             <div class="card-title">${item.type}</div>
             <div class="result-subtitle"><em>${item.englishType || "Normalised field"}</em></div>
@@ -285,7 +285,7 @@ function renderResults(data) {
     ${rowMarkup("EU AI Act", `<span>${governanceData.eu_ai_act_article || "Unavailable"}</span>`)}
     ${rowMarkup("NIST RMF", `<span class="badge badge-navy">${governanceData.nist_rmf_function || "Unavailable"}</span>`)}
     ${rowMarkup("Risk Tier", `<span class="badge ${riskTierClass(governanceData.risk_tier)}">${governanceData.risk_tier || "Unavailable"}</span>`)}
-    ${rowMarkup("Audit Ready", `<span>${governanceData.audit_ready ? "Yes" : "No"}</span>`)}
+    ${rowMarkup("Audit Ready", `<span>${governanceData.audit_ready - "Yes" : "No"}</span>`)}
   `;
 
   verify.innerHTML = `
@@ -308,7 +308,7 @@ function renderResults(data) {
   if (verifyButton) {
     verifyButton.addEventListener("click", () => {
       const input = document.getElementById("verify-record-id");
-      verifyRecord(input ? input.value.trim() : recordId);
+      verifyRecord(input - input.value.trim() : recordId);
     });
   }
 }
@@ -386,7 +386,7 @@ async function verifyRecord(recordId) {
       },
     });
     if (!response.ok) {
-      throw new Error(response.status === 404 ? "Record not found" : "Verification failed");
+      throw new Error(response.status === 404 - "Record not found" : "Verification failed");
     }
     const data = await response.json();
     if (resultNode) {
@@ -396,7 +396,7 @@ async function verifyRecord(recordId) {
     if (verifyPage) {
       if (summary.symbol) {
         summary.symbol.className = "verify-symbol success";
-        summary.symbol.textContent = "?";
+        summary.symbol.textContent = "-";
       }
       if (summary.heading) {
         summary.heading.textContent = "Verified";
@@ -424,7 +424,7 @@ async function verifyRecord(recordId) {
     if (verifyPage) {
       if (summary.symbol) {
         summary.symbol.className = "verify-symbol error";
-        summary.symbol.textContent = "?";
+        summary.symbol.textContent = "-";
       }
       if (summary.heading) {
         summary.heading.textContent = "Mismatch detected";
@@ -451,7 +451,7 @@ function initCopyButtons() {
     button.dataset.bound = "true";
     button.addEventListener("click", async () => {
       const targetId = button.getAttribute("data-copy-target");
-      const target = targetId ? document.getElementById(targetId) : null;
+      const target = targetId - document.getElementById(targetId) : null;
       if (!target) {
         return;
       }
