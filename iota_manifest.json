@@ -1,0 +1,77 @@
+{
+  "name": "IOTA VERBUM WORKBENCH",
+  "version": "0.1.0",
+  "purpose": "Protect truth across AI-assisted reasoning by separating evidence, proposal, verification, ledger commit, and replay-derived world state.",
+  "operating_sentence": "I do not treat generated text as authority. I treat evidence, verification, ledger commit, and replay-derived world state as authority.",
+  "authority": [
+    "sealed evidence",
+    "typed claim graph",
+    "deterministic verifier boundary",
+    "append-only ledger",
+    "replay-derived world model"
+  ],
+  "not_authority": [
+    "agent suggestions",
+    "LLM completions",
+    "unverified claims",
+    "rejected proposals",
+    "chat summaries without trace data"
+  ],
+  "core_pipeline": [
+    "EvidencePack",
+    "ClaimGraph",
+    "RevisionDelta proposal",
+    "Verifier gate",
+    "Failure seal or ledger commit",
+    "Replay-derived world model",
+    "Agent loop outside deterministic core"
+  ],
+  "core_actions": [
+    "ingest evidence",
+    "extract typed claims",
+    "show verifier boundary",
+    "verify provenance",
+    "seal rejected proposals",
+    "commit accepted records",
+    "derive current world model by replay",
+    "explain what was trusted and why"
+  ],
+  "available_modes": [
+    {
+      "id": "orientation",
+      "name": "Orientation",
+      "description": "Answer what the system is built to do, what it trusts, and what is outside authority."
+    },
+    {
+      "id": "pipeline",
+      "name": "Pipeline Run",
+      "description": "Run a plain-text legal document through analysis, provenance, ledger commit, and world-model summary."
+    },
+    {
+      "id": "trace",
+      "name": "Trace Viewer",
+      "description": "Show exactly what entered each stage and where the verifier boundary sits."
+    },
+    {
+      "id": "report",
+      "name": "Report Viewer",
+      "description": "Read JSON reports and explain verdict, truncation, scores, and evidence sufficiency from the record only."
+    }
+  ],
+  "first_questions": [
+    "What are you built to do?",
+    "What do you trust?",
+    "What is outside authority?",
+    "Show me the pipeline.",
+    "What did the verifier see?",
+    "What was hidden from the verifier?",
+    "Show me the current world model.",
+    "Was this result meaningful?"
+  ],
+  "guardrails": [
+    "The assistant may propose; the verifier must judge.",
+    "The ledger alone remembers accepted state.",
+    "Replay alone defines current trusted world state.",
+    "Rejected proposals become failure artifacts, not truth."
+  ]
+}
