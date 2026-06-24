@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}IOTA VERBUM Workbench{% endblock %}
+
+{% block head %}
+<style>
+  .wb{max-width:1380px;margin:0 auto;padding:32px 20px 70px}.wb-hero{border:1px solid rgba(103,232,249,.3);background:#07111f;border-radius:26px;padding:28px;color:#eaf8ff}.wb-hero h1{font-size:clamp(34px,5vw,68px);margin:8px 0}.wb-grid{display:grid;grid-template-columns:340px 1fr 390px;gap:18px;margin-top:20px}.panel{border:1px solid rgba(148,163,184,.25);background:#07111f;border-radius:22px;padding:18px;color:#eaf8ff}.panel h2{font-size:14px;color:#93c5fd;text-transform:uppercase;letter-spacing:.12em}.pill{display:inline-block;border:1px solid rgba(34,197,94,.35);border-radius:999px;padding:7px 10px;margin:4px;color:#dcfce7}.pill.warn{border-color:rgba(245,158,11,.45);color:#fde68a}.chat{height:320px;overflow:auto;background:#020617;border-radius:16px;padding:12px}.msg{padding:10px 12px;border-radius:12px;background:#1e293b;margin:0 0 10px}.msg.user{background:#155e75}.row{display:flex;gap:10px;margin-top:10px}.input,.text{width:100%;border:1px solid rgba(148,163,184,.35);background:#020617;color:#eaf8ff;border-radius:12px;padding:12px}.text{min-height:150px}.btn{border:0;border-radius:12px;padding:12px 14px;font-weight:800;background:#22d3ee;color:#042f2e;cursor:pointer}.btn.secondary{background:#1e293b;color:#eaf8ff;border:1px solid rgba(148,163,184,.35)}.stage{border:1px solid rgba(148,163,184,.25);border-radius:16px;padding:13px;margin:10px 0;background:#0f172a;cursor:pointer}.stage.pass{border-color:rgba(34,197,94,.5)}.json{white-space:pre-wrap;word-break:break-word;background:#020617;border:1px solid rgba(148,163,184,.25);border-radius:16px;padding:12px;max-height:560px;overflow:auto;font-size:12px}.quick{display:flex;flex-wrap:wrap;gap:8px}.quick button{font-size:12px;padding:8px 10px}@media(max-width:1100px){.wb-grid{grid-template-columns:1fr}}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="wb">
+  <section class="wb-hero">
+    <strong>Conversational cockpit</strong>
+    <h1>IOTA VERBUM Workbench</h1>
+    <p>{{ manifest.operating_sentence }}</p>
+    {% for item in manifest.authority %}<span class="pill">{{ item }}</span>{% endfor %}
+  </section>
+
+  <section class="wb-grid">
+    <aside class="panel">
+      <h2>Talk</h2>
+      <div class="chat" id="chatLog"><p class="msg">Ask what I am built to do, what I trust, what the verifier saw, or what the world model contains.</p></div>
+      <div class="quick" id="quickQuestions">
+        {% for question in manifest.first_questions %}<button class="btn secondary" data-question="{{ question }}">{{ question }}</button>{% endfor %}
+      </div>
+      <div class="row"><input class="input" id="chatInput" placeholder="Ask the workbench..." /><button class="btn" id="sendChat">Send</button></div>
+    </aside>
+
+    <main class="panel">
+      <h2>Visible pipeline</h2>
+      <textarea class="text" id="documentText" spellcheck="false">Upload or paste a short plain-text document here. The workbench will normalise it, hash it, run deterministic extraction, verify provenance, commit a workbench record, and show the derived world model.</textarea>
+      <div class="row"><input class="input" id="filename" value="workbench.txt" /><button class="btn" id="runPipeline">Run Pipeline</button></div>
+      <div id="stageList" style="margin-top:14px"></div>
+    </main>
+
+    <aside class="panel">
+      <h2>Stage data</h2>
+      <pre class="json" id="jsonView">Select a stage or run the pipeline.</pre>
+      <h2>Report inspector</h2>
+      <textarea class="text" id="reportText" placeholder="Paste a JSON report here..."></textarea>
+      <div class="row"><button class="btn" id="inspectReport">Inspect Report</button></div>
+    </aside>
+  </section>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/workbench.js" defer></script>
+{% endblock %}
